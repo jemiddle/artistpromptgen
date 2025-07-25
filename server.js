@@ -29,7 +29,7 @@ const openai = new OpenAIApi(configuration);
 app.post("/generate-prompt", async (req, res) => {
   const { artist, mood, tempo, gender } = req.body;
 
-const prompt = `This is not a songwriting prompt so do not suggest song titles.  Generate a concise detailed prompt with fewer than 1000 characters that captures the unique sound and stylistic elements of ${artist}. The track should have a ${mood} mood, ${tempo} tempo, and feature ${gender} vocals. Focus on vibe, tone, and genre influences. Do NOT include a song title or lyrics. Do NOT mention the artist’s name. The goal is to inspire an AI music generator like Suno or Riffusion. Make the prompt immersive, rich in details, and concise, no more than 1000 characters.`;
+const prompt = `Generate a concise detailed prompt with fewer than 1000 characters that captures the unique sound and stylistic elements of ${artist}. The track should have a ${mood} mood, ${tempo} tempo, and feature ${gender} vocals. Focus on vibe, tone, and genre influences. Do NOT include a song title or lyrics. Do NOT mention the artist’s name. The goal is to inspire an AI music generator like Suno or Riffusion. Make the prompt immersive, rich in details, and concise, no more than 1000 characters.`;
 
 
   try {
