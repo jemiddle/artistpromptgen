@@ -5,11 +5,7 @@
 \margl1440\margr1440\vieww11520\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 // Check if user has paid before allowing access\
-if (localStorage.getItem('hasPaid') !== 'true') \{\
-  window.location.href = 'login.html'; // or another access page like 'checkout.html'\
-\}\
-import \{ initializeApp \} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";\
+\f0\fs24 \cf0 import \{ initializeApp \} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";\
 import \{ getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut \} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";\
 import Stripe from 'stripe';\
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);\
