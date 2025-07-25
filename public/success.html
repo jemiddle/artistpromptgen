@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Success</title>
+  <script>
+    // Set the "paid" flag in localStorage
+    localStorage.setItem('hasPaid', 'true');
+
+    // Redirect to the main app after a short delay
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1000);
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3efe7;
+      color: #333;
+      text-align: center;
+      padding-top: 100px;
+    }
+    h1 {
+      color: #2d6a4f;
+    }
+  </style>

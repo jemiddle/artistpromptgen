@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login – Artist Prompt Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #0c0c0c;
+      color: #f4f4f4;
+    }
+    input {
+      padding: 10px;
+      margin: 5px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+    }
+    #status {
+      margin-top: 15px;
+      color: #ff7b7b;
+    }
+  </style>
+</head>
+<body>
+  <h2>Login to Use the Prompt Generator</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <button onclick="signup()">Sign Up</button>
+
+<!-- Stripe Paywall Button -->
+<!<button id="buyBtn"><!Buy Access - $5/Month</button>
+
+  <div id="status"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+   const firebaseConfig = {
+  apiKey: "AIzaSyBoczb2TgHSSk9R3TxfIYApUJh2vxcfyGY",
+  authDomain: "artistpromptgenerator.firebaseapp.com",
+  projectId: "artistpromptgenerator",
+  storageBucket: "artistpromptgenerator.firebasestorage.app",
+  messagingSenderId: "1069538885121",
+  appId: "1:1069538885121:web:8521bcda17eba00b8c8a00"
+};
+
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const status = document.getElementById("status");
+
+    window.login = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "index.html"; // redirect on success
+      } catch (err) {
+        status.innerText = err.message;
+      }
+    };
+
+    window.signup = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        window.location.href = "index.html"; // redirect on success
+      } catch (err) {
+        status.innerText = err.message;
+      }
+    };
+  </script>
+<script type="module" src="script.js"></script>
+<script>
+  document.getElementById("buyBtn").addEventListener("click", async () => {
+    const res = await fetch("/create-checkout-session", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Error starting checkout");
+    }
+  });
+</script>
+</body>
+</html>

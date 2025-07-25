@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Artist Prompt Generator</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at center, #f0e8d8, #e1d6c4);
+      color: #3b2f2f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #5e3c2f;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #4a2f25;
+    }
+
+    #logoutBtn {
+      background-color: #a0522d;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    #logoutBtn:hover {
+      background-color: #8b4513;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      background: #f9f6f1;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      max-width: 100%;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Paywall protection
+    if (localStorage.getItem('hasPaid') !== 'true') {
+      window.location.href = 'checkout.html';
+    }
+  </script>
+
+  <div class="container">
+    <h1>Artist Prompt Generator</h1>
+
+    <input type="text" id="artist" placeholder="Artist/Producer/Album/Song Name" />
+    <input type="text" id="mood" placeholder="Mood (e.g., sad, dreamy, gritty)" />
+    <input type="text" id="tempo" placeholder="Tempo (e.g., slow, mid, fast)" />
+    <select id="gender">
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+
+    <button onclick="getPrompt()">Generate Prompt</button>
+    <pre id="output">Your prompt will appear here...</pre>
+    <button onclick="copyPrompt()">Copy Prompt</button>
+
+ 
+
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Firebase Auth -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoczb2TgHSSk9R3TxfIYApUJh2vxcfyGY",
+      authDomain: "artistpromptgenerator.firebaseapp.com",
+      projectId: "artistpromptgenerator",
+      storageBucket: "artistpromptgenerator.appspot.com",
+      messagingSenderId: "1069538885121",
+      appId: "1:1069538885121:web:8521bcda17eba00b8c8a00"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+
+    window.logout = function () {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      }).catch((error) => {
+        console.error("Logout error:", error);
+      });
+    };
+  </script>
+
+  <!-- Prompt Script -->
+  <script>
+    async function getPrompt() {
+      const artist = document.getElementById("artist").value;
+      const mood = document.getElementById("mood").value;
+      const tempo = document.getElementById("tempo").value;
+      const gender = document.getElementById("gender").value;
+
+      const res = await fetch("/generate-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artist, mood, tempo, gender })
+      });
+
+      const data = await res.json();
+      document.getElementById("output").innerText = data.result || data.error;
+    }
+
+    function copyPrompt() {
+      const text = document.getElementById("output").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Prompt copied to clipboard!");
+      }).catch((err) => {
+        console.error("Copy failed: ", err);
+      });
+    }
+  </script>
+</body>
+</html>
