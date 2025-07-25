@@ -145,6 +145,7 @@
  <!-- Prompt Script with Google Sheets Logging -->
 <script>
   async function getPrompt() {
+    console.log("🎯 getPrompt() was called");
     const artist = document.getElementById("artist").value;
     const mood = document.getElementById("mood").value;
     const tempo = document.getElementById("tempo").value;
