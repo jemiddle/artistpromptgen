@@ -2,14 +2,11 @@
 \cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\margl1440\margr1440\vieww18380\viewh12260\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
 \f0\fs24 \cf0 import \{ initializeApp \} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";\
 import \{ getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut \} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";\
-import Stripe from 'stripe';\
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);\
-\
 \
 // Firebase config\
 const firebaseConfig = \{\
@@ -54,7 +51,7 @@ if (window.location.pathname.includes("index.html")) \{\
     \});\
   \};\
 \
-  // Prompt generator\
+  // Prompt generator with Google Sheets logging\
   window.getPrompt = async function () \{\
     const artist = document.getElementById("artist").value;\
     const mood = document.getElementById("mood").value;\
@@ -68,10 +65,32 @@ if (window.location.pathname.includes("index.html")) \{\
     \});\
 \
     const data = await res.json();\
-    document.getElementById("output").innerText = data.result || data.error;\
+    const result = data.result || data.error;\
+\
+    document.getElementById("output").innerText = result;\
+\
+    // \uc0\u9989  Log prompt to Google Sheets\
+    onAuthStateChanged(auth, (user) => \{\
+      fetch("https://script.google.com/macros/s/AKfycbwWQ2-cqdZcleCkMsE9SbQTR0CMjFEGj7ey5uf8Jej-Og7zXG0j8UzL7lQD-KSmmdTv/exec", \{\
+        method: "POST",\
+        headers: \{\
+          "Content-Type": "application/json"\
+        \},\
+        body: JSON.stringify(\{\
+          artist: artist,\
+          mood: mood,\
+          tempo: tempo,\
+          vocalGender: gender,\
+          prompt: result,\
+          email: user?.email || "anonymous"\
+        \})\
+      \})\
+      .then(res => console.log("\uc0\u9989  Logged to Google Sheets"))\
+      .catch(err => console.error("\uc0\u10060  Logging failed", err));\
+    \});\
   \};\
 \
-  // Copy button\
+  // Copy to clipboard\
   window.copyPrompt = () => \{\
     const text = document.getElementById("output").innerText;\
     navigator.clipboard.writeText(text).then(() => \{\
