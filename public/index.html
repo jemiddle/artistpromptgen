@@ -129,6 +129,8 @@
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "login.html";
+      } else {
+        window.currentUser = user;
       }
     });
 
@@ -140,14 +142,8 @@
       });
     };
 
-    window.auth = auth;
-    window.db = db;
-  </script>
-
-  <!-- Prompt Script with Firestore Logging -->
-  <script>
-    async function getPrompt() {
-      console.log("🎯 getPrompt() was called");
+    window.getPrompt = async function () {
+      console.log("🎯 getPrompt() called");
 
       const artist = document.getElementById("artist").value;
       const mood = document.getElementById("mood").value;
@@ -166,38 +162,33 @@
 
         document.getElementById("output").innerText = result;
 
-        const user = window.auth.currentUser;
-        if (user) {
+        if (window.currentUser) {
           const logEntry = {
             artist,
             mood,
             tempo,
             vocalGender: gender,
             prompt: result,
-            email: user.email,
-            timestamp: firebase.firestore.Timestamp.now?.() || new Date() // fallback
+            email: window.currentUser.email,
+            timestamp: serverTimestamp()
           };
 
-          // Firestore logging
-          const docRef = await firebase.firestore().collection("prompts").add(logEntry);
-          console.log("✅ Prompt logged to Firestore:", docRef.id);
+          const docRef = await addDoc(collection(db, "prompts"), logEntry);
+          console.log("✅ Logged to Firestore:", docRef.id);
         } else {
-          console.warn("⚠️ User not authenticated, skipping logging.");
+          console.warn("⚠️ No authenticated user. Skipping Firestore log.");
         }
-
       } catch (err) {
         console.error("❌ Error in getPrompt or logging:", err);
       }
-    }
+    };
 
-    function copyPrompt() {
+    window.copyPrompt = function () {
       const text = document.getElementById("output").innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Prompt copied to clipboard!");
-      }).catch((err) => {
-        console.error("Copy failed: ", err);
-      });
-    }
+      navigator.clipboard.writeText(text)
+        .then(() => alert("Prompt copied to clipboard!"))
+        .catch(err => console.error("Copy failed: ", err));
+    };
   </script>
 </body>
 </html>
