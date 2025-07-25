@@ -107,10 +107,11 @@
     <button id="logoutBtn" onclick="logout()">Logout</button>
   </div>
 
-  <!-- Firebase Auth -->
+  <!-- Firebase + Firestore -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBoczb2TgHSSk9R3TxfIYApUJh2vxcfyGY",
@@ -123,6 +124,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -137,9 +139,12 @@
         console.error("Logout error:", error);
       });
     };
+
+    window.auth = auth;
+    window.db = db;
   </script>
 
-  <!-- Prompt Script with Google Sheets Logging -->
+  <!-- Prompt Script with Firestore Logging -->
   <script>
     async function getPrompt() {
       console.log("🎯 getPrompt() was called");
@@ -161,25 +166,24 @@
 
         document.getElementById("output").innerText = result;
 
-        const logData = {
-          artist,
-          mood,
-          tempo,
-          vocalGender: gender,
-          prompt: result,
-          email: "testuser@example.com"
-        };
+        const user = window.auth.currentUser;
+        if (user) {
+          const logEntry = {
+            artist,
+            mood,
+            tempo,
+            vocalGender: gender,
+            prompt: result,
+            email: user.email,
+            timestamp: firebase.firestore.Timestamp.now?.() || new Date() // fallback
+          };
 
-        console.log("📤 Sending to Google Sheets:", logData);
-
-        const sheetRes = await fetch("https://script.google.com/macros/s/AKfycbwWQ2-cqdZcleCkMsE9SbQTR0CMjFEGj7ey5uf8Jej-Og7zXG0j8UzL7lQD-KSmmdTv/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(logData)
-        });
-
-        const sheetResponseText = await sheetRes.text();
-        console.log("✅ Google Sheets response:", sheetResponseText);
+          // Firestore logging
+          const docRef = await firebase.firestore().collection("prompts").add(logEntry);
+          console.log("✅ Prompt logged to Firestore:", docRef.id);
+        } else {
+          console.warn("⚠️ User not authenticated, skipping logging.");
+        }
 
       } catch (err) {
         console.error("❌ Error in getPrompt or logging:", err);
