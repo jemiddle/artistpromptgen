@@ -142,32 +142,53 @@
     };
   </script>
 
-  <!-- Prompt Script -->
-  <script>
-    async function getPrompt() {
-      const artist = document.getElementById("artist").value;
-      const mood = document.getElementById("mood").value;
-      const tempo = document.getElementById("tempo").value;
-      const gender = document.getElementById("gender").value;
+ <!-- Prompt Script with Google Sheets Logging -->
+<script>
+  async function getPrompt() {
+    const artist = document.getElementById("artist").value;
+    const mood = document.getElementById("mood").value;
+    const tempo = document.getElementById("tempo").value;
+    const gender = document.getElementById("gender").value;
 
-      const res = await fetch("/generate-prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artist, mood, tempo, gender })
-      });
+    const res = await fetch("/generate-prompt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ artist, mood, tempo, gender })
+    });
 
-      const data = await res.json();
-      document.getElementById("output").innerText = data.result || data.error;
-    }
+    const data = await res.json();
+    const result = data.result || data.error;
 
-    function copyPrompt() {
-      const text = document.getElementById("output").innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Prompt copied to clipboard!");
-      }).catch((err) => {
-        console.error("Copy failed: ", err);
-      });
-    }
-  </script>
+    document.getElementById("output").innerText = result;
+
+    // ✅ Google Sheets Logging
+    fetch("https://script.google.com/macros/s/AKfycbwWQ2-cqdZcleCkMsE9SbQTR0CMjFEGj7ey5uf8Jej-Og7zXG0j8UzL7lQD-KSmmdTv/exec", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        artist: artist,
+        mood: mood,
+        tempo: tempo,
+        vocalGender: gender,
+        prompt: result,
+        email: "testuser@example.com" // You can update this if you later use auth again
+      })
+    })
+    .then(res => console.log("✅ Logged to Google Sheets"))
+    .catch(err => console.error("❌ Logging failed", err));
+  }
+
+  function copyPrompt() {
+    const text = document.getElementById("output").innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      alert("Prompt copied to clipboard!");
+    }).catch((err) => {
+      console.error("Copy failed: ", err);
+    });
+  }
+</script>
+
 </body>
 </html>
